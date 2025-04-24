@@ -1,6 +1,7 @@
+import axios from "axios";
 import InputMask from 'comigo-tech-react-input-mask';
 import React, { useState } from "react";
-import { Button, Container, Divider, Form, Icon } from 'semantic-ui-react';
+import { Button, Container, Divider, Form, FormGroup, FormRadio, Icon } from 'semantic-ui-react';
 import MenuSistema from '../../MenuSistema';
 
 export default function FormEntregador () {
@@ -20,6 +21,7 @@ export default function FormEntregador () {
     const [enderecoCidade, setEnderecoCidade] = useState(); 
     const [enderecoCep, setEnderecoCep] = useState(); 
     const [enderecoUf, setEnderecoUf] = useState(); 
+    const [ativo, setAtivo] = useState(true);
 
     function salvar() { //Função cria um objeto e coloca na variavel clientRequest(backend)
 
@@ -37,7 +39,8 @@ export default function FormEntregador () {
              enderecoComplemento:enderecoComplemento,
              enderecoBairro:enderecoBairro,
              enderecoCep:enderecoCep,
-             enderecoUf:enderecoUf
+             enderecoUf:enderecoUf,
+             ativo:ativo
 		}
 	
 		axios.post("http://localhost:8080/api/entregador", EntregadorRequest) //Requisição atraves da biblioteca axios do tipo post
@@ -156,9 +159,10 @@ export default function FormEntregador () {
                                 <Form.Input
                                     fluid
                                     label='Valor Por Frete'
-                                    width={6}>
+                                    width={6}
                                     value={valorFrete}
 		                        	onChange={e => setValorFrete(e.target.value)}
+                                    >
                                 </Form.Input>
 
                                 </Form.Group>
@@ -234,40 +238,22 @@ export default function FormEntregador () {
                                 </Form.Input>
 
 
-<div class="ui form">
-  <div class="inline fields">
-    <label>Ativo:</label>
-    <div class="field">
-      <div class="ui radio checkbox">
-        <label>Sim</label>
-      </div>
-    </div>
-    <div class="field">
-      <div class="ui radio checkbox">
-        <label>Não</label>
-      </div>
-    </div>
-  </div>
-</div>
 
-
-<FormGroup>
-<label>Ativo:</label>
-
+<FormGroup inline>
+          <label>Ativo:</label>
           <FormRadio
-            label='não:'
-            value='Sim'
-            checked={value === true}
-            onChange={this.handleChange}
+            label='Sim'
+            checked={ativo === true}
+            onChange={e => setAtivo(true)}
           />
           <FormRadio
-            label='não'
-            value='Não'
-            checked={value === false}
-            onChange={this.handleChange}
+            label='Não'
+            checked={ativo === false}
+            onChange={e => setAtivo(false)}
           />
+         
+        </FormGroup>
 
-</FormGroup>
                         </Form>
                         
                         <div style={{marginTop: '4%'}}>
