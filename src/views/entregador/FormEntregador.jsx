@@ -1,6 +1,7 @@
 import axios from "axios";
 import InputMask from 'comigo-tech-react-input-mask';
 import React, { useState } from "react";
+import { Link } from "react-router-dom";
 import { Button, Container, Divider, Form, FormGroup, FormRadio, Icon } from 'semantic-ui-react';
 import MenuSistema from '../../MenuSistema';
 
@@ -258,6 +259,8 @@ export default function FormEntregador () {
                         
                         <div style={{marginTop: '4%'}}>
 
+                        <Link to={'/list-entregador'}>
+
                             <Button
                                 type="button"
                                 inverted
@@ -267,9 +270,11 @@ export default function FormEntregador () {
                                 color='orange'
                             >
                                 <Icon name='reply' />
-                                Listar
+                                Voltar
                             </Button>
                                 
+                            </Link>
+
                             <Button
                                 inverted
                                 circular
