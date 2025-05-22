@@ -1,5 +1,5 @@
 import axios from 'axios';
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { Button, Container, Divider, Header, Icon, Modal, Table } from 'semantic-ui-react';
 import MenuSistema from '../../MenuSistema';
@@ -7,7 +7,6 @@ import MenuSistema from '../../MenuSistema';
 export default function ListEntregador() {
 
     const [lista, setLista] = useState([]);
-    const [open, setOpen] = useState(false);
     const [openModal, setOpenModal] = useState(false);
     const [idRemover, setIdRemover] = useState();
 
@@ -71,56 +70,6 @@ export default function ListEntregador() {
                             as={Link}
                             to='/form-entregador'
                         />
-
-                        {/* Botão para abrir o modal */}
-                        <Button onClick={() => setOpen(true)}>Informações</Button>
-
-                        {/* Modal incluído no mesmo arquivo */}
-                        <Modal centered={false} open={open} onClose={() => setOpen(false)}>
-                            <Modal.Header>Endereço</Modal.Header>
-                            <Modal.Content>
-                                <Table celled>
-                                    <Table.Header>
-                                        <Table.Row>
-                                            <Table.HeaderCell>Nome</Table.HeaderCell>
-                                            <Table.HeaderCell>Rua</Table.HeaderCell>
-                                            <Table.HeaderCell>Complemento</Table.HeaderCell>
-                                            <Table.HeaderCell>Número</Table.HeaderCell>
-                                            <Table.HeaderCell>Bairro</Table.HeaderCell>
-                                            <Table.HeaderCell>Cidade</Table.HeaderCell>
-                                            <Table.HeaderCell>CEP</Table.HeaderCell>
-                                            <Table.HeaderCell>UF</Table.HeaderCell>
-                                            <Table.HeaderCell textAlign='center'>Ações</Table.HeaderCell>
-                                        </Table.Row>
-                                    </Table.Header>
-                                    <Table.Body>
-                                        {lista && lista.map(entregador => (
-                                            <Table.Row key={entregador.id}>
-                                                <Table.Cell>{entregador.nome}</Table.Cell>
-                                                <Table.Cell>{entregador.enderecoRua}</Table.Cell>
-                                                <Table.Cell>{entregador.enderecoComplemento}</Table.Cell>
-                                                <Table.Cell>{entregador.enderecoNumero}</Table.Cell>
-                                                <Table.Cell>{entregador.enderecoBairro}</Table.Cell>
-                                                <Table.Cell>{entregador.enderecoCidade}</Table.Cell>
-                                                <Table.Cell>{entregador.enderecoCep}</Table.Cell>
-                                                <Table.Cell>{entregador.enderecoUf}</Table.Cell>
-                                                <Table.Cell textAlign='center'>
-                                                    <Button inverted circular color='green' icon>
-                                                        <Icon name='edit' />
-                                                    </Button> &nbsp;
-                                                    <Button inverted circular color='red' icon>
-                                                        <Icon name='trash' />
-                                                    </Button>
-                                                </Table.Cell>
-                                            </Table.Row>
-                                        ))}
-                                    </Table.Body>
-                                </Table>
-                            </Modal.Content>
-                            <Modal.Actions>
-                                <Button onClick={() => setOpen(false)}>Voltar</Button>
-                            </Modal.Actions>
-                        </Modal>
 
                         <br /><br /><br />
                         <Table color='orange' sortable celled>

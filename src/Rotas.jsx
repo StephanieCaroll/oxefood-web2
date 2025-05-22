@@ -1,5 +1,7 @@
 import { Route, Routes } from "react-router-dom";
 
+import FormCategoriaProduto from './views/categoriaproduto/FormCategoriaProduto';
+import ListCategoriaProduto from './views/categoriaproduto/ListCategoriaProduto';
 import FormCliente from './views/cliente/FormCliente';
 import ListCliente from './views/cliente/ListCliente';
 import FormCupomDesconto from "./views/cupomDesconto/FormCupomDesconto";
@@ -19,10 +21,12 @@ function Rotas() {
                 <Route path="list-produto" element={ <ListProduto/> } />
                 <Route path="list-entregador" element={ <ListEntregador/> } />
                 <Route path="list-cupomDesconto" element={ <ListCupomDesconto/> } />
+                <Route path="list-categoriaProduto" element={ <ListCategoriaProduto/> } />
                 <Route path="form-cliente" element={ <FormCliente/> } />
                 <Route path="form-produto" element={ <FormProduto/> } />
                 <Route path="form-entregador" element={ <FormEntregador/> } />
                 <Route path="form-cupomDesconto" element={ <FormCupomDesconto/> } />
+                <Route path="form-categoriaProduto" element={ <FormCategoriaProduto/> } />
             </Routes>
         </>
     )
