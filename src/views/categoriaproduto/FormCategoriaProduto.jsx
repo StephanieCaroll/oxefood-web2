@@ -8,7 +8,8 @@ export default function FormCategoriaProduto() {
 
     const [descricao, setDescricao] = useState();
     const [idCategoriaProduto, setIdCategoriaProduto] = useState();
-
+    const [state] = useState();
+    
     useEffect(() => {
 
         if (state != null && state.id != null) { 
