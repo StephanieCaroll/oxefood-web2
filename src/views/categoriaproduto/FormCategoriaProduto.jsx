@@ -8,12 +8,14 @@ export default function FormCategoriaProduto() {
 
     const [descricao, setDescricao] = useState();
     const [idCategoriaProduto, setIdCategoriaProduto] = useState();
+    const [state] = useState();
 
+    
     useEffect(() => {
 
         if (state != null && state.id != null) { 
 
-            axios.get("http://localhost:8080/api/categoriaProduto/" + state.id) //Requisição de consulta
+            axios.get("http://localhost:8080/api/categoriaproduto/" + state.id) //Requisição de consulta
                 .then((response) => {
                     setIdCategoriaProduto(response.data.id)
                     setDescricao(response.data.descricao)
@@ -29,11 +31,11 @@ export default function FormCategoriaProduto() {
         }
 
         if (idCategoriaProduto != null) { //Alteração:
-            axios.put("http://localhost:8080/api/categoriaProduto/" + idCategoriaProduto, categoriaProdutoRequest)
+            axios.put("http://localhost:8080/api/categoriaproduto/" + idCategoriaProduto, categoriaProdutoRequest)
                 .then((response) => { console.log('Categoria alterada com sucesso.') })
                 .catch((error) => { console.log('Erro ao alterar uma categoria.') })
         } else { //Cadastro:
-            axios.post("http://localhost:8080/api/categoriaProduto", categoriaProdutoRequest)
+            axios.post("http://localhost:8080/api/categoriaproduto", categoriaProdutoRequest)
                 .then((response) => { console.log('Categoria cadastrado com sucesso.') })
                 .catch((error) => { console.log('Erro ao incluir a categoria.') })
         }
