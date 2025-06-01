@@ -1,5 +1,5 @@
 import axios from "axios";
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { Button, Container, Divider, Form, Icon } from "semantic-ui-react";
 import MenuSistema from "../../MenuSistema";
@@ -14,9 +14,7 @@ export default function FormProduto() {
   const { state } = useLocation();
   const [idProduto, setIdProduto] = useState();
    const [listaCategoria, setListaCategoria] = useState([]);
-   const [idCategoria, setIdCategoria] = useState();
-  
-
+   const [idCategoria, setIdCategoria] = useState();   
   useEffect(() => {
 
        if (state != null && state.id != null) {
