@@ -15,9 +15,7 @@ export default function FormProduto() {
   const [idProduto, setIdProduto] = useState();
    const [listaCategoria, setListaCategoria] = useState([]);
    const [idCategoria, setIdCategoria] = useState();
-
-
-   
+  
 
   useEffect(() => {
 
