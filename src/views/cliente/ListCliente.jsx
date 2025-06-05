@@ -32,13 +32,20 @@ export default function ListCliente() {
       setLista(response.data);
     });
   }
-  function formatarData(dataParam) {
-    if (dataParam === null || dataParam === "" || dataParam === undefined) {
+   function formatarData(dataParam) {
+    if (!dataParam) { 
       return "";
     }
 
-    let arrayData = dataParam.split("-");
-    return arrayData[2] + "/" + arrayData[1] + "/" + arrayData[0];
+    let arrayData = String(dataParam).split("/"); 
+    
+    if (arrayData.length === 3) {
+      return `${arrayData[0]}/${arrayData[1]}/${arrayData[2]}`;
+    } else {
+      
+      console.warn("Formato de data inesperado, retornando string original:", dataParam);
+      return String(dataParam); 
+    }
   }
 
   async function remover() {

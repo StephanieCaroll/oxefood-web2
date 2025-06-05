@@ -57,12 +57,13 @@ export default function ListEntregador() {
             <MenuSistema tela={'entregador'} />
             <div style={{ marginTop: '3%' }}>
                 <Container textAlign='justified'>
+
                     <h2>Entregador</h2>
                     <Divider />
 
                     <div style={{ marginTop: '4%' }}>
                         <Button
-                            content='Novo'
+                            label='Novo'
                             circular
                             color='orange'
                             icon='clipboard outline'
@@ -70,9 +71,10 @@ export default function ListEntregador() {
                             as={Link}
                             to='/form-entregador'
                         />
-
                         <br /><br /><br />
+
                         <Table color='orange' sortable celled>
+
                             <Table.Header>
                                 <Table.Row>
                                     <Table.HeaderCell>Nome</Table.HeaderCell>

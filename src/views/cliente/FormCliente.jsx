@@ -53,16 +53,23 @@ export default function FormCliente() {
         }
 
     }
+    
 
     function formatarData(dataParam) {
-
-        if (dataParam === null || dataParam === '' || dataParam === undefined) {
-            return ''
-        }
-
-        let arrayData = dataParam.split('-');
-        return arrayData[2] + '/' + arrayData[1] + '/' + arrayData[0];
+    if (!dataParam) { 
+      return "";
     }
+
+    let arrayData = String(dataParam).split("/"); 
+    
+    if (arrayData.length === 3) {
+      return `${arrayData[0]}/${arrayData[1]}/${arrayData[2]}`;
+    } else {
+      
+      console.warn("Formato de data inesperado, retornando string original:", dataParam);
+      return String(dataParam); 
+    }
+  }
 
     return (
 
@@ -119,23 +126,18 @@ export default function FormCliente() {
                                 <Form.Input
                                     fluid
                                     label='Fone Celular'
-                                    width={6}>
-                                    <InputMask
-                                        mask="(99) 9999.9999"
+                                    width={6}
                                         value={foneCelular}
-                                        onChange={e => setFoneCelular(e.target.value)}
-                                    />
+                                        onChange={e => setFoneCelular(e.target.value)}>
                                 </Form.Input>
 
                                 <Form.Input
                                     fluid
                                     label='Fone Fixo'
-                                    width={6}>
-                                    <InputMask
-                                        mask="(99) 9999.9999"
+                                    width={6}
                                         value={foneFixo}
-                                        onChange={e => setFoneFixo(e.target.value)}
-                                    />
+                                        onChange={e => setFoneFixo(e.target.value)}>
+                                    
                                 </Form.Input>
 
                                 <Form.Input
