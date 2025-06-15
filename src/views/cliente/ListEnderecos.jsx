@@ -20,8 +20,7 @@ export default function ListEnderecos() {
             carregarEnderecosDoCliente(clienteId);
             carregarNomeDoCliente(clienteId);
         } else {
-            // Se não há clienteId, tenta carregar todos os endereços.
-            // VOCÊ DEVE CONFIRMAR ESTE ENDPOINT NO SEU BACKEND.
+            
             carregarTodosEnderecos();
         }
     }, [clienteId]);
@@ -32,8 +31,8 @@ export default function ListEnderecos() {
     }
 
     function carregarTodosEnderecos() {
-        // ASSUMIR QUE ESTE É O ENDPOINT PARA TODOS OS ENDEREÇOS. CONFIRME NO BACKEND.
-        axios.get(`http://localhost:8080/api/endereco`) // Endpoint mais genérico para todos os endereços
+       
+        axios.get(`http://localhost:8080/api/endereco`) 
             .then((response) => {
                 setListaEnderecos(response.data);
             })
@@ -43,8 +42,8 @@ export default function ListEnderecos() {
     }
 
     function carregarEnderecosDoCliente(id) {
-        // ESTE ENDPOINT PARECE SER O MAIS PROVÁVEL PARA ENDEREÇOS DE UM CLIENTE. CONFIRME NO BACKEND.
-        axios.get(`http://localhost:8080/api/cliente/${id}/endereco`) // Mantido como está no seu código
+       
+        axios.get(`http://localhost:8080/api/cliente/${id}/endereco`) 
             .then((response) => {
                 setListaEnderecos(response.data);
             })
@@ -87,7 +86,7 @@ export default function ListEnderecos() {
             <MenuSistema tela={'endereco'} />
             <div style={{ marginTop: '3%' }}>
                 <Container textAlign='justified'>
-                    <h2> Endereços {nomeCliente && `de ${nomeCliente}`} </h2>
+                    <h2> Endereços {nomeCliente && `de ${nomeCliente}`} {clienteId && `(ID: ${clienteId})`} </h2>
                     <Divider />
 
                     <div style={{ marginTop: '4%' }}>

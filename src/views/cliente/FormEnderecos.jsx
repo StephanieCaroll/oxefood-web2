@@ -6,22 +6,22 @@ import { Button, Container, Divider, Form, Icon } from "semantic-ui-react";
 import MenuSistema from "../../MenuSistema";
 
 export default function FormEnderecos() {
-  const [rua, setRua] = useState();
-  const [numero, setNumero] = useState();
-  const [bairro, setBairro] = useState();
-  const [cep, setCep] = useState();
-  const [cidade, setCidade] = useState();
-  const [estado, setEstado] = useState();
-  const [complemento, setComplemento] = useState();
+  const [rua, setRua] = useState('');
+  const [numero, setNumero] = useState('');
+  const [bairro, setBairro] = useState('');
+  const [cep, setCep] = useState('');
+  const [cidade, setCidade] = useState('');
+  const [estado, setEstado] = useState('');
+  const [complemento, setComplemento] = useState('');
   const { state } = useLocation();
-  const [idCliente, setIdCliente] = useState();
+  const [idCliente, setIdCliente] = useState('');
 
   useEffect(() => {
     if (state != null && state.id != null) {
       //Se o id estiver não entrará no if  não terá requisição
 
       axios
-        .get("http://localhost:8080/api/cliente/endereco" + state.id) //Requisição de consulta
+        .get("http://localhost:8080/api/cliente/endereco/" + state.id) //Requisição de consulta
         .then((response) => {
           setIdCliente(response.data.id);
           setRua(response.data.rua);
@@ -54,14 +54,14 @@ export default function FormEnderecos() {
       //Alteração:
       axios
         .put(
-          "http://localhost:8080/api/cliente/endereco" + idCliente,enderecoClienteRequest
+          "http://localhost:8080/api/cliente/endereco/" + idCliente,enderecoClienteRequest
         )
         .then((response) => {console.log("Endereço alterado com sucesso.");})
         .catch((error) => {console.log("Erro ao alterar um Endereço.");});
     } else {
       //Cadastro:
       axios
-        .post("http://localhost:8080/api/cliente/endereco", enderecoClienteRequest)
+        .post("http://localhost:8080/api/cliente/endereco/", enderecoClienteRequest)
         .then((response) => {
           console.log("Endereço cadastrado com sucesso.");
         })
