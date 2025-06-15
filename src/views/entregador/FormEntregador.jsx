@@ -33,7 +33,7 @@ export default function FormEntregador() {
                     setIdEntregador(response.data.id)
                     setNome(response.data.nome)
                     setCpf(response.data.cpf)
-                    setRg(response.data.Rg)
+                    setRg(response.data.rg)
                     setDataNascimento(formatarData(response.data.dataNascimento))
                     setFoneCelular(response.data.foneCelular)
                     setFoneFixo(response.data.foneFixo)
@@ -46,6 +46,7 @@ export default function FormEntregador() {
                     setEnderecoCidade(response.data.enderecoCidade)
                     setEnderecoCep(response.data.enderecoCep)
                     setEnderecoUf(response.data.enderecoUf)
+                    setAtivo(response.data.ativo)
                 })
         }
     }, [state])
@@ -66,6 +67,7 @@ export default function FormEntregador() {
             enderecoNumero: enderecoNumero,
             enderecoComplemento: enderecoComplemento,
             enderecoBairro: enderecoBairro,
+            enderecoCidade: enderecoCidade,
             enderecoCep: enderecoCep,
             enderecoUf: enderecoUf,
             ativo: ativo
@@ -74,7 +76,7 @@ export default function FormEntregador() {
         if (idEntregador != null) { //Alteração:
             axios.put("http://localhost:8080/api/entregador/" + idEntregador, EntregadorRequest)
                 .then((response) => { console.log('Entregador alterado com sucesso.') })
-                .catch((error) => { console.log('Erro ao alter um entregador.') })
+                .catch((error) => { console.log('Erro ao alterar um entregador.') })
         } else { //Cadastro:
             axios.post("http://localhost:8080/api/entregador", EntregadorRequest)
                 .then((response) => { console.log('Entregador cadastrado com sucesso.') })
