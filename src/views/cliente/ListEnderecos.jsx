@@ -9,7 +9,6 @@ export default function ListEnderecos() {
     const navigate = useNavigate();
     const { id: clienteId } = location.state || {}; // Pega o id do cliente do state da navegação
 
-    // Removida a variável 'lista' não utilizada
     const [listaEnderecos, setListaEnderecos] = useState([]);
     const [openModal, setOpenModal] = useState(false);
     const [idRemover, setIdRemover] = useState();
@@ -20,10 +19,10 @@ export default function ListEnderecos() {
             carregarEnderecosDoCliente(clienteId);
             carregarNomeDoCliente(clienteId);
         } else {
-            
+            // Se não há clienteId, carrega todos os endereços (comportamento que você já tinha)
             carregarTodosEnderecos();
         }
-    }, [clienteId]);
+    }, [clienteId]); // Adicionado clienteId como dependência para recarregar se mudar
 
     function confirmaRemover(id) {
         setOpenModal(true);
@@ -31,8 +30,10 @@ export default function ListEnderecos() {
     }
 
     function carregarTodosEnderecos() {
-       
-        axios.get(`http://localhost:8080/api/endereco`) 
+        // Se houver um endpoint para listar TODOS os endereços sem filtro de cliente, use-o aqui
+        // Ex: `http://localhost:8080/api/endereco` (se existir no backend)
+        // Por enquanto, vou manter o que está, mas certifique-se que seu backend suporta.
+        axios.get(`http://localhost:8080/api/endereco`)
             .then((response) => {
                 setListaEnderecos(response.data);
             })
@@ -42,8 +43,7 @@ export default function ListEnderecos() {
     }
 
     function carregarEnderecosDoCliente(id) {
-       
-        axios.get(`http://localhost:8080/api/cliente/${id}/endereco`) 
+        axios.get(`http://localhost:8080/api/cliente/${id}/endereco`)
             .then((response) => {
                 setListaEnderecos(response.data);
             })
@@ -65,9 +65,9 @@ export default function ListEnderecos() {
 
     async function remover() {
         try {
-            // CORREÇÃO NA URL DO DELETE: Use template literal para incluir o ID
             await axios.delete(`http://localhost:8080/api/cliente/endereco/${idRemover}`);
             console.log('Endereço removido com sucesso.');
+
             // Recarrega a lista de endereços após a remoção
             if (clienteId) {
                 carregarEnderecosDoCliente(clienteId);
@@ -86,7 +86,9 @@ export default function ListEnderecos() {
             <MenuSistema tela={'endereco'} />
             <div style={{ marginTop: '3%' }}>
                 <Container textAlign='justified'>
-                    <h2> Endereços {nomeCliente && `de ${nomeCliente}`} {clienteId && `(ID: ${clienteId})`} </h2>
+                    <h2>
+                        Endereços {nomeCliente && `de ${nomeCliente}`} {clienteId && `(ID: ${clienteId})`}
+                    </h2>
                     <Divider />
 
                     <div style={{ marginTop: '4%' }}>
@@ -144,8 +146,9 @@ export default function ListEnderecos() {
                                                     title='Clique aqui para editar os dados deste endereço'
                                                     icon
                                                 >
-                                                    {/* Passa o clienteId para o FormEnderecos via state ao editar */}
-                                                    <Link to={`/form-endereco/${endereco.id}`} state={{ clienteId: clienteId }} style={{ color: 'green' }}>
+                                                    {/* >>> MUDANÇA AQUI <<< */}
+                                                    {/* Passa o clienteId via query parameter também para edição */}
+                                                    <Link to={`/form-endereco/${endereco.id}?clienteId=${clienteId}`} style={{ color: 'green' }}>
                                                         <Icon name='edit' />
                                                     </Link>
                                                 </Button>

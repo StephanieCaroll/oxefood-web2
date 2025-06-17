@@ -1,11 +1,16 @@
 import axios from "axios";
 import InputMask from "comigo-tech-react-input-mask";
 import React, { useEffect, useState } from "react";
-import { Link, useLocation } from "react-router-dom";
-import { Button, Container, Divider, Form, Icon } from "semantic-ui-react";
+import { useNavigate, useParams, useLocation } from "react-router-dom";
+import { Button, Container, Divider, Form, Icon, Message } from "semantic-ui-react";
 import MenuSistema from "../../MenuSistema";
 
 export default function FormEnderecos() {
+  const navigate = useNavigate();
+  const { id } = useParams(); // ID do ENDEREÇO (se estiver em modo de edição)
+  const location = useLocation(); // Para pegar o clienteId dos query parameters (quando adicionando novo)
+
+  // Estados para os campos do formulário
   const [rua, setRua] = useState('');
   const [numero, setNumero] = useState('');
   const [bairro, setBairro] = useState('');
@@ -13,60 +18,91 @@ export default function FormEnderecos() {
   const [cidade, setCidade] = useState('');
   const [estado, setEstado] = useState('');
   const [complemento, setComplemento] = useState('');
-  const { state } = useLocation();
-  const [idCliente, setIdCliente] = useState('');
 
+  // Estados cruciais para a lógica de associação e identificação de modo (edição/cadastro)
+  const [idEndereco, setIdEndereco] = useState(null); // ID do endereço sendo editado
+  const [idClienteAssociado, setIdClienteAssociado] = useState(null); // ID do cliente ao qual este endereço pertence
+
+  // Estados para feedback visual ao usuário
+  const [mensagemSucesso, setMensagemSucesso] = useState('');
+  const [mensagemErro, setMensagemErro] = useState('');
+
+  // Efeito para carregar dado
   useEffect(() => {
-    if (state != null && state.id != null) {
-      //Se o id estiver não entrará no if  não terá requisição
-
-      axios
-        .get("http://localhost:8080/api/cliente/endereco/" + state.id) //Requisição de consulta
-        .then((response) => {
-          setIdCliente(response.data.id);
-          setRua(response.data.rua);
-          setNumero(response.data.numero);
-          setBairro(response.data.bairro);
-          setCep(response.data.cep);
-          setCidade(response.data.cidade);
-          setEstado(response.data.estado);
-          setComplemento(response.data.complemento);
-        });
+    // 1. Tenta obter o clienteId 
+    const params = new URLSearchParams(location.search);
+    const clienteIdFromQuery = params.get('clienteId');
+    if (clienteIdFromQuery) {
+        setIdClienteAssociado(clienteIdFromQuery);
     }
-  }, [state]);
 
+    // 2. Se há um ID, significa que estamos EDITANDO um endereço.
+    if (id) {
+        // GET para buscar um endereço específico (para edição)
+        // URL: /api/cliente/endereco/{id}
+
+        axios.get(`http://localhost:8080/api/cliente/endereco/${id}`)
+            .then((response) => {
+                const endereco = response.data;
+                setIdEndereco(endereco.id);
+                setRua(endereco.rua);
+                setNumero(endereco.numero);
+                setBairro(endereco.bairro);
+                setCep(endereco.cep);
+                setCidade(endereco.cidade);
+                setEstado(endereco.estado);
+                setComplemento(endereco.complemento);
+                setIdClienteAssociado(endereco.cliente?.id || null); 
+            })
+            .catch((error) => {
+                console.error("Erro ao carregar endereço para edição:", error);
+                setMensagemErro("Erro ao carregar os dados do endereço para edição.");
+            });
+    }
+  }, [id, location.search]);
+
+  // Função para salvar (criar ou atualizar) o endereço 
   function salvar() {
-    //Função cria um objeto e coloca na variavel clientRequest(backend)
+    setMensagemSucesso('');
+    setMensagemErro('');
+
+    if (!idClienteAssociado) {
+        setMensagemErro("Erro: Um endereço deve estar associado a um cliente. Por favor, retorne e selecione um cliente válido.");
+        return;
+    }
 
     let enderecoClienteRequest = {
-      //Como se fosse o Json (com os dados do cliente)
-      id: idCliente,
       rua: rua,
       numero: numero,
       bairro: bairro,
       cep: cep,
       cidade: cidade,
       estado: estado,
-      complemento: complemento,
+      complemento: complemento
     };
 
-    if (idCliente != null) {
-      //Alteração:
-      axios
-        .put(
-          "http://localhost:8080/api/cliente/endereco/" + idCliente,enderecoClienteRequest
-        )
-        .then((response) => {console.log("Endereço alterado com sucesso.");})
-        .catch((error) => {console.log("Erro ao alterar um Endereço.");});
-    } else {
-      //Cadastro:
-      axios
-        .post("http://localhost:8080/api/cliente/endereco/", enderecoClienteRequest)
-        .then((response) => {
-          console.log("Endereço cadastrado com sucesso.");
+    if (idEndereco) { // Se `idEndereco` tem valor, é ALTERAÇÃO (PUT)
+      // URL: /api/cliente/endereco/{enderecoId}
+      axios.put(`http://localhost:8080/api/cliente/endereco/${idEndereco}`, enderecoClienteRequest)
+        .then(() => {
+          setMensagemSucesso("Endereço alterado com sucesso!");
+          navigate('/list-endereco', { state: { id: idClienteAssociado } });
         })
         .catch((error) => {
-          console.log("Erro ao incluir um endereço.");
+          console.error("Erro ao alterar um endereço:", error.response?.data || error);
+          setMensagemErro("Erro ao alterar o endereço. Verifique o console.");
+        });
+    } else { // Se `idEndereco` é null, é CADASTRO (POST)
+      // *** AQUI ESTÁ A MUDANÇA CRÍTICA, BASEADA NO SEU POSTMAN ***
+      // URL: /api/cliente/endereco/{clienteId}
+      axios.post(`http://localhost:8080/api/cliente/endereco/${idClienteAssociado}`, enderecoClienteRequest)
+        .then(() => {
+          setMensagemSucesso("Endereço cadastrado com sucesso!");
+          navigate('/list-endereco', { state: { id: idClienteAssociado } });
+        })
+        .catch((error) => {
+          console.error("Erro ao incluir um endereço:", error.response?.data || error);
+          setMensagemErro("Erro ao incluir um endereço. Verifique o console.");
         });
     }
   }
@@ -77,28 +113,13 @@ export default function FormEnderecos() {
 
       <div style={{ marginTop: "3%" }}>
         <Container textAlign="justified">
-          {idCliente === undefined && (
-            <h2>
-              {" "}
-              <span style={{ color: "darkgray" }}>
-                {" "}
-                Endereços &nbsp;
-                <Icon name="angle double right" size="small" />{" "}
-              </span>{" "}
-              Cadastro
-            </h2>
-          )}
-          {idCliente != undefined && (
-            <h2>
-              {" "}
-              <span style={{ color: "darkgray" }}>
-                {" "}
-                Endereços &nbsp;
-                <Icon name="angle double right" size="small" />{" "}
-              </span>{" "}
-              Alteração
-            </h2>
-          )}
+          <h2>
+            <span style={{ color: "darkgray" }}>
+              Endereços &nbsp;
+              <Icon name="angle double right" size="small" />{" "}
+            </span>
+            {idEndereco ? "Alteração" : "Cadastro"}
+          </h2>
 
           <Divider />
 
@@ -106,95 +127,68 @@ export default function FormEnderecos() {
             <Form>
               <Form.Group widths="equal">
                 <Form.Input
-                  required
-                  fluid
-                  label="Rua"
-                  maxLength="100"
-                  value={rua}
-                  onChange={(e) => setRua(e.target.value)}
+                  required fluid label="Rua" maxLength="100"
+                  value={rua} onChange={(e) => setRua(e.target.value)}
                 />
-
                 <Form.Input
-                  required
-                  fluid
-                  label="Número"
-                  maxLength="100"
-                  value={numero}
-                  onChange={(e) => setNumero(e.target.value)}
+                  required fluid label="Número" maxLength="10"
+                  value={numero} onChange={(e) => setNumero(e.target.value)}
                 />
               </Form.Group>
 
               <Form.Group widths={"equal"}>
                 <Form.Input
-                  required
-                  fluid
-                  label="Bairro"
-                  maxLength="100"
-                  value={bairro}
-                  onChange={(e) => setBairro(e.target.value)}
+                  required fluid label="Bairro" maxLength="100"
+                  value={bairro} onChange={(e) => setBairro(e.target.value)}
                 />
+                <Form.Field
+                  required label="CEP" control={InputMask} mask="99999-999"
+                  value={cep} onChange={(e) => setCep(e.target.value)}
+                />
+              </Form.Group>
 
+              <Form.Group widths="equal">
                 <Form.Input
-                  required
-                  fluid
-                  label="CEP"
-                  maxLength="100"
-                  value={cep}
-                  onChange={(e) => setCep(e.target.value)}
-                />
-</Form.Group>
-<Form.Group widths="equal">
-                <Form.Input
-                  required
-                  fluid
-                  label="Cidade"
-                  maxLength="100"
-                  value={cidade}
-                  onChange={(e) => setCidade(e.target.value)}
+                  required fluid label="Cidade" maxLength="100"
+                  value={cidade} onChange={(e) => setCidade(e.target.value)}
                 />
                 <Form.Input
-                  required
-                  fluid
-                  label="Estado"
-                  maxLength="100"
-                  value={estado}
-                  onChange={(e) => setEstado(e.target.value)}
+                  required fluid label="Estado" maxLength="2"
+                  value={estado} onChange={(e) => setEstado(e.target.value)}
                 />
-
                 <Form.Input
-                  fluid
-                  label="Complemento"
-                  placeholder="Apto, Bloco, etc"
-                  maxLength="100"
-                  value={complemento}
-                  onChange={(e) => setRua(e.target.value)}
+                  fluid label="Complemento" placeholder="Apto, Bloco, etc" maxLength="100"
+                  value={complemento} onChange={(e) => setComplemento(e.target.value)}
                 />
               </Form.Group>
             </Form>
 
+            {mensagemSucesso && <Message positive>{mensagemSucesso}</Message>}
+            {mensagemErro && <Message negative>{mensagemErro}</Message>}
+            
+            {idClienteAssociado && !idEndereco && (
+                <Message info>
+                    Você está adicionando um novo endereço para o **Cliente ID: {idClienteAssociado}**.
+                </Message>
+            )}
+            {!idClienteAssociado && (
+                <Message warning>
+                    **Atenção:** Não foi possível identificar o cliente associado a este endereço. Certifique-se de que você acessou esta página a partir de um cliente válido para poder salvar.
+                </Message>
+            )}
+
             <div style={{ marginTop: "4%" }}>
-              <Link to={"/list-endereco"}>
-                <Button
-                  type="button"
-                  inverted
-                  circular
-                  icon
-                  labelPosition="left"
-                  color="orange"
-                >
-                  <Icon name="reply" />
-                  Voltar
-                </Button>
-              </Link>
+              <Button
+                type="button" inverted circular icon labelPosition="left" color="orange"
+                onClick={() => navigate('/list-endereco', { state: { id: idClienteAssociado } })}
+              >
+                <Icon name="reply" />
+                Voltar
+              </Button>
 
               <Button
-                inverted
-                circular
-                icon
-                labelPosition="left"
-                color="blue"
-                floated="right"
-                onClick={() => salvar()}
+                inverted circular icon labelPosition="left" color="blue" floated="right"
+                onClick={salvar}
               >
                 <Icon name="save" />
                 Salvar
