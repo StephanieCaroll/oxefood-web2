@@ -19,10 +19,9 @@ export default function ListEnderecos() {
             carregarEnderecosDoCliente(clienteId);
             carregarNomeDoCliente(clienteId);
         } else {
-            // Se não há clienteId, carrega todos os endereços (comportamento que você já tinha)
             carregarTodosEnderecos();
         }
-    }, [clienteId]); // Adicionado clienteId como dependência para recarregar se mudar
+    }, [clienteId]);
 
     function confirmaRemover(id) {
         setOpenModal(true);
@@ -30,9 +29,6 @@ export default function ListEnderecos() {
     }
 
     function carregarTodosEnderecos() {
-        // Se houver um endpoint para listar TODOS os endereços sem filtro de cliente, use-o aqui
-        // Ex: `http://localhost:8080/api/endereco` (se existir no backend)
-        // Por enquanto, vou manter o que está, mas certifique-se que seu backend suporta.
         axios.get(`http://localhost:8080/api/endereco`)
             .then((response) => {
                 setListaEnderecos(response.data);
@@ -68,7 +64,6 @@ export default function ListEnderecos() {
             await axios.delete(`http://localhost:8080/api/cliente/endereco/${idRemover}`);
             console.log('Endereço removido com sucesso.');
 
-            // Recarrega a lista de endereços após a remoção
             if (clienteId) {
                 carregarEnderecosDoCliente(clienteId);
             } else {
@@ -99,7 +94,8 @@ export default function ListEnderecos() {
                             icon='clipboard outline'
                             floated='right'
                             as={Link}
-                            // Passa o clienteId como parâmetro de query para o FormEnderecos
+                            // Para um NOVO endereço, ainda passamos via query parameter,
+                            // pois o FormEnderecos usa location.search para isso.
                             to={clienteId ? `/form-endereco?clienteId=${clienteId}` : '/form-endereco'}
                         />
                         <Link to={'/list-cliente'}>
@@ -146,9 +142,10 @@ export default function ListEnderecos() {
                                                     title='Clique aqui para editar os dados deste endereço'
                                                     icon
                                                 >
-                                                    {/* >>> MUDANÇA AQUI <<< */}
-                                                    {/* Passa o clienteId via query parameter também para edição */}
-                                                    <Link to={`/form-endereco/${endereco.id}?clienteId=${clienteId}`} style={{ color: 'green' }}>
+                                                    {/* >>> MUDANÇA AQUI: Passa ID do Endereço e ClienteId via STATE <<< */}
+                                                    <Link to={`/form-endereco`} 
+                                                          state={{ idEndereco: endereco.id, clienteId: clienteId }} 
+                                                          style={{ color: 'green' }}>
                                                         <Icon name='edit' />
                                                     </Link>
                                                 </Button>

@@ -7,8 +7,7 @@ import MenuSistema from "../../MenuSistema";
 
 export default function FormEnderecos() {
   const navigate = useNavigate();
-  const { id } = useParams(); // ID do ENDEREÇO (se estiver em modo de edição)
-  const location = useLocation(); // Para pegar o clienteId dos query parameters (quando adicionando novo)
+  const location = useLocation();
 
   // Estados para os campos do formulário
   const [rua, setRua] = useState('');
@@ -27,24 +26,22 @@ export default function FormEnderecos() {
   const [mensagemSucesso, setMensagemSucesso] = useState('');
   const [mensagemErro, setMensagemErro] = useState('');
 
-  // Efeito para carregar dado
+  // Efeito para carregar dados (se editando) ou obter clienteId (se novo) 
   useEffect(() => {
-    // 1. Tenta obter o clienteId 
-    const params = new URLSearchParams(location.search);
-    const clienteIdFromQuery = params.get('clienteId');
-    if (clienteIdFromQuery) {
-        setIdClienteAssociado(clienteIdFromQuery);
-    }
+    // 1. Tenta obter o clienteId DO STATE da navegação (usado quando se clica em EDITAR na lista)
+    // E também o idEndereco, se estiver vindo da edição.
+    const { idEndereco: idEndFromState, clienteId: clienteIdFromState } = location.state || {};
 
-    // 2. Se há um ID, significa que estamos EDITANDO um endereço.
-    if (id) {
+    if (idEndFromState) {
+        // Se há idEndereco no state, estamos em modo de EDIÇÃO
+        setIdEndereco(idEndFromState);
+        setIdClienteAssociado(clienteIdFromState); // Garante que o clienteId também é capturado para o PUT
+
         // GET para buscar um endereço específico (para edição)
-        // URL: /api/cliente/endereco/{id}
-
-        axios.get(`http://localhost:8080/api/cliente/endereco/${id}`)
+        // URL: /api/cliente/endereco/{idEndereco}
+        axios.get(`http://localhost:8080/api/cliente/endereco/${idEndFromState}`)
             .then((response) => {
                 const endereco = response.data;
-                setIdEndereco(endereco.id);
                 setRua(endereco.rua);
                 setNumero(endereco.numero);
                 setBairro(endereco.bairro);
@@ -52,14 +49,24 @@ export default function FormEnderecos() {
                 setCidade(endereco.cidade);
                 setEstado(endereco.estado);
                 setComplemento(endereco.complemento);
-                setIdClienteAssociado(endereco.cliente?.id || null); 
+                // Ao carregar para edição, se o clienteId não veio do state, tentamos pegar do endereço (se disponível)
+                if (!clienteIdFromState && endereco.cliente?.id) {
+                    setIdClienteAssociado(endereco.cliente.id); 
+                }
             })
             .catch((error) => {
                 console.error("Erro ao carregar endereço para edição:", error);
                 setMensagemErro("Erro ao carregar os dados do endereço para edição.");
             });
+    } else {
+        // 2. Se não há idEndereco no state, tenta obter o clienteId dos query parameters (para NOVO endereço).
+        const params = new URLSearchParams(location.search);
+        const clienteIdFromQuery = params.get('clienteId');
+        if (clienteIdFromQuery) {
+            setIdClienteAssociado(clienteIdFromQuery);
+        }
     }
-  }, [id, location.search]);
+  }, [location.state, location.search]); 
 
   // Função para salvar (criar ou atualizar) o endereço 
   function salvar() {
@@ -82,7 +89,7 @@ export default function FormEnderecos() {
     };
 
     if (idEndereco) { // Se `idEndereco` tem valor, é ALTERAÇÃO (PUT)
-      // URL: /api/cliente/endereco/{enderecoId}
+      // URL DO SEU BACKEND: /api/cliente/endereco/{enderecoId}
       axios.put(`http://localhost:8080/api/cliente/endereco/${idEndereco}`, enderecoClienteRequest)
         .then(() => {
           setMensagemSucesso("Endereço alterado com sucesso!");
@@ -93,8 +100,7 @@ export default function FormEnderecos() {
           setMensagemErro("Erro ao alterar o endereço. Verifique o console.");
         });
     } else { // Se `idEndereco` é null, é CADASTRO (POST)
-      // *** AQUI ESTÁ A MUDANÇA CRÍTICA, BASEADA NO SEU POSTMAN ***
-      // URL: /api/cliente/endereco/{clienteId}
+      // URL DO SEU BACKEND: /api/cliente/endereco/{clienteId}
       axios.post(`http://localhost:8080/api/cliente/endereco/${idClienteAssociado}`, enderecoClienteRequest)
         .then(() => {
           setMensagemSucesso("Endereço cadastrado com sucesso!");
@@ -169,6 +175,11 @@ export default function FormEnderecos() {
             {idClienteAssociado && !idEndereco && (
                 <Message info>
                     Você está adicionando um novo endereço para o **Cliente ID: {idClienteAssociado}**.
+                </Message>
+            )}
+            {idClienteAssociado && idEndereco && (
+                <Message info>
+                    Você está editando o **Endereço ID: {idEndereco}** do **Cliente ID: {idClienteAssociado}**.
                 </Message>
             )}
             {!idClienteAssociado && (
