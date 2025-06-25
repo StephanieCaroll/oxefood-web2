@@ -33,13 +33,7 @@ export default function MenuSistema(props) { //Menu do semantic ui
                     as={Link}
                     to='/list-entregador'
                 />
-                <Menu.Item
-                    content='Cupom Desconto'
-                    active={props.tela === 'cupomDesconto'}
-                    as={Link}
-                    to='/list-cupomDesconto'
-                />
-
+               
                  <Menu.Item
                     content='Categoria Produto'
                     active={props.tela === 'categoriaProduto'}

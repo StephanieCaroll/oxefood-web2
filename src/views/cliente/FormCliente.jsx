@@ -1,4 +1,5 @@
 import axios from "axios";
+import { notifyError, notifySuccess } from "../../views/util/Util";
 import InputMask from "comigo-tech-react-input-mask";
 import { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
@@ -35,7 +36,7 @@ export default function FormCliente() {
     let clienteRequest = {
       nome,
       cpf,
-      dataNascimento, 
+      dataNascimento,
       foneCelular,
       foneFixo,
     };
@@ -45,11 +46,20 @@ export default function FormCliente() {
       axios
         .put(`http://localhost:8080/api/cliente/${idCliente}`, clienteRequest)
         .then(() => {
-          console.log("Cliente alterado com sucesso.");
+          notifySuccess("Cliente alterado com sucesso.");
           navigate("/list-cliente");
         })
-        .catch(() => {
-          console.log("Erro ao alterar um cliente.");
+        .catch((error) => {
+          // console.log("Erro ao alterar um cliente.");
+
+          if (error.response.data.errors != undefined) {
+            for (let i = 0; i < error.response.data.errors.length; i++) {
+              notifyError(error.response.data.errors[i].defaultMessage);
+            }
+          } else {
+            notifyError(error.response.data.message);
+          }
+          
         });
     } else {
       // Cadastro
@@ -58,7 +68,7 @@ export default function FormCliente() {
         .post("http://localhost:8080/api/cliente", clienteRequest)
         .then((response) => {
           const id = response.data.id;
-          console.log("Cliente cadastrado com sucesso. ID:", id);
+          notifySuccess("Cliente cadastrado com sucesso. ID:", id);
         })
         .catch((error) => {
           console.error("Erro ao incluir o cliente:", error);
@@ -153,8 +163,7 @@ export default function FormCliente() {
               >
                 <Icon name="save" /> Salvar
               </Button>
-            </div>           
-
+            </div>
           </div>
         </Container>
       </div>

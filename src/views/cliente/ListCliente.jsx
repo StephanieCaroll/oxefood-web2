@@ -1,4 +1,5 @@
 import axios from "axios";
+import { notifyError, notifySuccess } from "../../views/util/Util";
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import {
@@ -32,34 +33,90 @@ export default function ListCliente() {
       setLista(response.data);
     });
   }
-   function formatarData(dataParam) {
-    if (!dataParam) { 
+
+  function formatarData(dataParam) {
+    if (!dataParam) {
       return "";
     }
 
-    let arrayData = String(dataParam).split("/"); 
-    
-    if (arrayData.length === 3) {
-      return `${arrayData[0]}/${arrayData[1]}/${arrayData[2]}`;
+    let dia = "";
+    let mes = "";
+    let ano = "";
+
+    if (Array.isArray(dataParam) && dataParam.length === 3) {
+      ano = dataParam[0];
+      mes = String(dataParam[1]).padStart(2, "0"); // Garante 2 dígitos
+      dia = String(dataParam[2]).padStart(2, "0"); // Garante 2 dígitos
+    } else if (typeof dataParam === "string" && dataParam.includes("-")) {
+      const parts = dataParam.split("-");
+      if (parts.length === 3) {
+        ano = parts[0];
+        mes = parts[1];
+        dia = parts[2];
+      }
     } else {
-      
-      console.warn("Formato de data inesperado, retornando string original:", dataParam);
-      return String(dataParam); 
+      console.warn(
+        "Formato de data inesperado, retornando string original:",
+        dataParam
+      );
+      return String(dataParam);
     }
+
+    return `${dia}/${mes}/${ano}`;
+  }
+
+  // Nova função para formatar CPF
+  function formatarCpf(cpfParam) {
+    if (!cpfParam) {
+      return "";
+    }
+    // Remove qualquer coisa que não seja dígito
+    const cpfLimpo = String(cpfParam).replace(/\D/g, "");
+
+    // Aplica a máscara se tiver 11 dígitos
+    if (cpfLimpo.length === 11) {
+      return cpfLimpo.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, "$1.$2.$3-$4");
+    }
+    return cpfLimpo; // Retorna sem máscara se não tiver 11 dígitos
+  }
+
+  // Nova função para formatar números de telefone (celular e fixo)
+  function formatarTelefone(foneParam) {
+    if (!foneParam) {
+      return "";
+    }
+    // Remove qualquer coisa que não seja dígito
+    const foneLimpo = String(foneParam).replace(/\D/g, "");
+
+    // Formata o número baseado no comprimento
+    if (foneLimpo.length === 11) {
+      // Celular com DDD (XX) XXXXX-XXXX
+      return foneLimpo.replace(/(\d{2})(\d{5})(\d{4})/, "($1) $2-$3");
+    } else if (foneLimpo.length === 10) {
+      // Fixo ou celular antigo com DDD (XX) XXXX-XXXX
+      return foneLimpo.replace(/(\d{2})(\d{4})(\d{4})/, "($1) $2-$3");
+    }
+    return foneLimpo; // Retorna sem máscara se não corresponder a um formato conhecido
   }
 
   async function remover() {
     await axios
       .delete("http://localhost:8080/api/cliente/" + idRemover)
       .then((response) => {
-        console.log("Cliente removido com sucesso.");
-
-        axios.get("http://localhost:8080/api/cliente").then((response) => {
-          setLista(response.data);
-        });
+        notifySuccess("Cliente removido com sucesso.");
+        carregarLista(); // Recarrega a lista após a remoção
       })
       .catch((error) => {
-        console.log("Erro ao remover um cliente.");
+        // console.log("Erro ao remover um cliente:", error);
+
+        if (error.response.data.errors != undefined) {
+          for (let i = 0; i < error.response.data.errors.length; i++) {
+            notifyError(error.response.data.errors[i].defaultMessage);
+          }
+        } else {
+          notifyError(error.response.data.message);
+        }
+        
       });
     setOpenModal(false);
   }
@@ -102,12 +159,19 @@ export default function ListCliente() {
                 {lista.map((cliente) => (
                   <Table.Row key={cliente.id}>
                     <Table.Cell>{cliente.nome}</Table.Cell>
-                    <Table.Cell>{cliente.cpf}</Table.Cell>
+                    <Table.Cell>{formatarCpf(cliente.cpf)}</Table.Cell>{" "}
+                    {/* CPF Formatado */}
                     <Table.Cell>
                       {formatarData(cliente.dataNascimento)}
                     </Table.Cell>
-                    <Table.Cell>{cliente.foneCelular}</Table.Cell>
-                    <Table.Cell>{cliente.foneFixo}</Table.Cell>
+                    <Table.Cell>
+                      {formatarTelefone(cliente.foneCelular)}
+                    </Table.Cell>{" "}
+                    {/* Celular Formatado */}
+                    <Table.Cell>
+                      {formatarTelefone(cliente.foneFixo)}
+                    </Table.Cell>{" "}
+                    {/* Fixo Formatado */}
                     <Table.Cell textAlign="center">
                       <Button
                         inverted
@@ -117,7 +181,7 @@ export default function ListCliente() {
                         icon
                       >
                         <Link
-                          to="/form-cliente"
+                          to={"/form-cliente"}
                           state={{ id: cliente.id }}
                           style={{ color: "green" }}
                         >
@@ -145,7 +209,7 @@ export default function ListCliente() {
                         icon
                       >
                         <Link
-                          to="/list-endereco"
+                          to={"/list-endereco"}
                           state={{ id: cliente.id }}
                           style={{ color: "blue" }}
                         >
